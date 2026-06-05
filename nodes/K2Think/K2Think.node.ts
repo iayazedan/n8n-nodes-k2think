@@ -90,8 +90,8 @@ export class K2Think implements INodeType {
 						name: 'reasoningHeadroom',
 						type: 'number',
 						typeOptions: { minValue: 0 },
-						default: 3500,
-						description: 'Extra tokens added on top of Max Completion Tokens so the long &lt;think&gt; preamble does not truncate the answer',
+						default: 8000,
+						description: 'Extra tokens added on top of Max Completion Tokens so the long &lt;think&gt; reasoning does not truncate the answer. K2 Think reasons extensively, so keep this generous.',
 					},
 					{
 						displayName: 'Strip Think Reasoning',
@@ -148,7 +148,7 @@ export class K2Think implements INodeType {
 				messages.push({ role: 'user', content: prompt });
 
 				const maxCompletionTokens =
-					(options.maxCompletionTokens ?? 1024) + (options.reasoningHeadroom ?? 3500);
+					(options.maxCompletionTokens ?? 1024) + (options.reasoningHeadroom ?? 8000);
 
 				// K2 gateway quirks: max_completion_tokens (not max_tokens), no streaming,
 				// no response_format JSON mode.
@@ -175,9 +175,17 @@ export class K2Think implements INodeType {
 
 				let content = response.choices?.[0]?.message?.content ?? '';
 
-				// Strip the <think>...</think> reasoning preamble unless disabled.
+				// Strip the reasoning preamble unless disabled. K2 Think V2 emits a
+				// closing </think> tag (often WITHOUT an opening <think>), then the
+				// final answer. So we drop everything up to and including the last
+				// </think>. If no closing tag is present (e.g. truncated reasoning),
+				// the content is left as-is.
 				if (options.stripThinking !== false) {
-					content = content.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+					const closeTag = '</think>';
+					const idx = content.lastIndexOf(closeTag);
+					if (idx !== -1) {
+						content = content.slice(idx + closeTag.length).trim();
+					}
 				}
 
 				const outputField = options.outputField || 'response';
