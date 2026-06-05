@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-k2think",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "n8n community node for the K2 Think V2 reasoning model (MBZUAI-IFM), OpenAI-compatible gateway at api.k2think.ai",
   "keywords": [
     "n8n-community-node-package",

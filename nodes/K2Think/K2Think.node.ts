@@ -13,7 +13,7 @@ export class K2Think implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'K2 Think',
 		name: 'k2Think',
-		icon: 'file:k2think.svg',
+		icon: 'file:k2think-logo.svg',
 		group: ['transform'],
 		version: 1,
 		subtitle: '={{ "Chat: " + $parameter["model"] }}',
