@@ -17,18 +17,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # NOTE: do NOT set registry-url here — it writes an empty _authToken to
-      # .npmrc which breaks npm Trusted Publishing (OIDC). npm defaults to the
-      # public registry and authenticates via OIDC.
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-
-      # Trusted Publishing requires npm >= 11.5.1
-      - run: npm install -g npm@latest
+          registry-url: https://registry.npmjs.org
 
       - run: npm ci
       - run: npm run build
       - run: npm run lint
 
+      # Auth via automation token (NPM_TOKEN secret); --provenance still signs
+      # the build via OIDC (id-token: write above).
       - run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
